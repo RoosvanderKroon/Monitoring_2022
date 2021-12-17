@@ -1,84 +1,124 @@
 
 
 library(raster)
-library(RStoolbox) # used for classification
-library(ggplot2) # used for plotting
-#library(gridExtra) 
+library(RStoolbox) # package to make the classification
+library(ggplot2) # package for the ggplot function
+library(gridExtra) # package for multiframe ggplot
+# install.packages("patchwork")
+library(patchwork)
+
 
 # setwd("C:/lab/") # Windows
 
 
-# NIR 1, RED 2, GREEN 3
+# brick
+# 1 list the files available
+rlist <- list.files(pattern="defor")
+rlist
+# 2 lapply: apply a function to a list 
+list_rast <- lapply(rlist, brick) # lapply(x, FUN)
+list_rast
 
-defor1 <- brick("defor1.jpg")
-plotRGB(defor1, r=1, g=2, b=3, stretch="lin")
-ggRGB(defor1, r=1, g=2, b=3, stretch="lin")
+plot(list_rast[[1]])
 
-defor2 <- brick("defor2.jpg")
-plotRGB(defor2, r=1, g=2, b=3, stretch="lin")
-ggRGB(defor2, r=1, g=2, b=3, stretch="lin")
+# defor: NIR 1, red 2, green 3
+plotRGB(list_rast[[1]], r=1, g=2, b=3, stretch="lin")
 
-par(mfrow=c(1,2))
-plotRGB(defor1, r=1, g=2, b=3, stretch="lin")
-plotRGB(defor2, r=1, g=2, b=3, stretch="lin")
+l1992 <- list_rast[[1]]
+plotRGB(l1992, r=1, g=2, b=3, stretch="lin")
 
-# multiframe with ggplot2 and gridExtra
-p1 <- ggRGB(defor1, r=1, g=2, b=3, stretch="lin")
-p2 <- ggRGB(defor2, r=1, g=2, b=3, stretch="lin")
-grid.arrange(p1, p2, nrow=2)
+l2006 <- list_rast[[2]]
+plotRGB(l2l1992 <- list_rast[[1]]
+plotRGB(l1992, r=1, g=2, b=3, stretch="lin")
+  
+# Unsupervised classification
+l1992c <- unsuperClass(l1992, nClasses=2) # unsuperClass(x, nClasses) 
+l1992c
 
-# unsupervised classification
-d1c <- unsuperClass(defor1, nClasses=2)
-plot(d1c$map)
-# class 1: forest
-# class 2: agriculture
+plot(l1992c$map)
+# value 1 = forests 
+# value 2 = agricultural areas and water
 
-# set.seed() would allow you to attain the same results ...
+freq(l1992c$map)
+#     value  count
+#[1,]     1  306582
+#[2,]     2  34710
 
-d2c <- unsuperClass(defor2, nClasses=2)
-plot(d2c$map)
-# class 1: agriculture
-# class 2: forest
+# forest (class 1) = 306582
+# agricultural areas and water (class 2) = 34710
 
-d2c3 <- unsuperClass(defor2, nClasses=3)
-plot(d2c3$map)
+total <- 341292
+propagri <- 34710/total
+propforest <- 306582/total
 
-# frequencies
-freq(d1c$map)
-#   value  count
-# [1,]     1 306583
-# [2,]     2  34709
+# agriculture and water: 0.1017018 ~ 0.10
+# forest: 0.8982982 ~ 0.90
 
-s1 <- 306583 + 34709
+# dataframe
+cover <- c("Forest", "Agriculture")
+# prop1992 <- c(0.8982982, 0.1017018)
+prop1992 <- c(propforest, propagri)
 
-prop1 <- freq(d1c$map) / s1
-# prop forest: 0.8983012
-# prop agriculture: 0.1016988
+proportion1992 <- data.frame(cover, prop1992)
 
-s2 <- 342726
-prop2 <- freq(d2c$map) / s2
-# prop forest: 0.5206958
-# prop agriculture: 0.4793042
+ggplot(proportion1992, aes(x=cover, y=prop1992, color=cover)) + geom_bar(stat="identity", fill="white")
 
-# build a dataframe
-cover <- c("Forest","Agriculture")
-percent_1992 <- c(89.83, 10.16)
-percent_2006 <- c(52.06, 47.93)
+# Classification of 2006
+# Unsupervised classification
+l2006c <- unsuperClass(l2006, nClasses=2) # unsuperClass(x, nClasses) 
+l2006c
 
-proportion <- data.frame(cover, percent_1992, percent_2006)
-percentages
+plot(l2006c$map)
+# forest: value 1
+# agriculture: value 2
+
+# Frequencies
+freq(l2006c$map)
+
+#  value  count
+#[1,]     1 179374 # forest
+#[2,]     2 163352 # agriculture
+
+# the proportions
+
+total <- 342726
+propagri2006 <- 163352/total
+propforest2006 <- 179374/total
+
+#  dataframe
+cover <- c("Forest", "Agriculture")
+prop1992 <- c(propforest, propagri)
+prop2006 <- c(propforest2006, propagri2006)
+
+proportion <- data.frame(cover, prop1992, prop2006)
+
+proportion
+ggplot(proportion, aes(x=cover, y=prop2006, color=cover)) + geom_bar(stat="identity", fill="white") + ylim(0,1)
+ggplot(proportion, aes(x=cover, y=prop1992, color=cover)) + geom_bar(stat="identity", fill="white") + ylim(0,1)
+
+# plotting altogether
+
+p1 <- ggplot(proportion, aes(x=cover, y=prop1992, color=cover)) + geom_bar(stat="identity", fill="white") + ylim(0,1)
+p2 <- ggplot(proportion, aes(x=cover, y=prop2006, color=cover)) + geom_bar(stat="identity", fill="white") + ylim(0,1)
+
+# plot two graphs with gridExtra package
+grid.arrange(p1, p2, nrow=1)
 
 
-ggplot(percentages, aes(x=cover, y=percent_1992, color=cover)) + geom_bar(stat="identity", fill="white")
-ggplot(percentages, aes(x=cover, y=percent_2006, color=cover)) + geom_bar(stat="identity", fill="white")
 
-#plotting altogether
-#p1 <- ggplot(percentages, aes(x=cover, y=percent_1992, color=cover)) + geom_bar(stat="identity", fill="white")
-#p2 <- ggplot(percentages, aes(x=cover, y=percent_2006, color=cover)) + geom_bar(stat="identity", fill="white")
 
-#grid.arrange(p1, p2, nrow=1)
 
-# + ylim(0,100)
+
+
+
+
+
+
+
+
+
+
+
 
 
 
