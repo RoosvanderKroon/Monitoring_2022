@@ -1,0 +1,25 @@
+# install.package("vegan")
+library(vegan)
+
+#setwd
+setwd("C:/lab/") 
+
+#load Rdata with load function
+load("biomes_multivar.RData")
+ls () # list objects
+
+# decorana: Detrended Correspondence Analysis and Basic Reciprocal Averaging
+multivar<- decorana(biomes)
+multivar
+
+#plot species
+
+plot(multivar)
+
+# group species together, which ones are in what biome?
+
+attach(biomes_types)
+ordiellipse(multivar, type, col=c("black","red","green","blue"), kind="ehull", lwd=3)
+
+# Function ordispider draws a `spider' diagram where each point is connected to the group centroid
+ordispider(multivar, type, col=c("black","red","green","blue"), label=T)
