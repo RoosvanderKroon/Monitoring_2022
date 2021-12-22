@@ -1,0 +1,14 @@
+# R code for species distribution modelling, namely the distribution of individuals
+
+# install.packages("sdm")
+
+library(sdm)
+library(raster) # predictors
+library(rgdal) # species
+
+file <- system.file("external/species.shp", package="sdm")
+
+species<- shapefile(file) # exactly like the raster function for raster files
+
+# plot species
+plot(species, pch=17, col="blue")
