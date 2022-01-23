@@ -4,7 +4,7 @@
 
 library(sdm)
 library(raster) # predictors
-library(rgdal) # species
+library(rgdal) # species: an array of  xy points x0,y0, x1,x2 and xn, yn
 
 file <- system.file("external/species.shp", package="sdm")
 
