@@ -1,0 +1,95 @@
+# code estimating energy in ecosystems
+
+# functions used today
+# brick (multi-layer raster object. They are typically created from a multi-layer (band) file; but they can also exist entirely in memory)
+# plot
+# plotRGB (Make a Red-Green-Blue plot based on three layers (in a RasterBrick or RasterStack)
+# par (par can be used to set or query graphical parameters, so number of colums and rows for representing the data graphs)
+
+# install.packages("raster") # package for Geographic Data Analysis and Modeling. Reading, writing, manipulating, analyzing and modeling of spatial data.
+# install.packages("rgdal") # Bindings for the 'Geospatial' Data Abstraction Library
+
+library(raster)
+library(rgdal)
+
+# Set wd
+setwd("~/lab/") # Linux 
+# setwd("C:/lab/")  # windows, this one for me
+# setwd("/Users/name/lab/") # mac
+
+# import the data
+l1992 <- brick("defor1_.jpg") # import image of 1992
+l1992 
+
+# Bands: defor1_.1, defor1_.2, defor1_.3 
+# plotRGB
+plotRGB(l1992, r=1, g=2, b=3, stretch="Lin") # "Lin" stands for linear stretch of the image
+
+# defor1_.1 = NIR (near infra red)
+# defor1_.2 = red
+# defor1_.3 = green
+
+plotRGB(l1992, r=2, g=1, b=3, stretch="Lin")
+plotRGB(l1992, r=2, g=3, b=1, stretch="Lin")
+
+# lesson stopped, continue on day 2
+
+l2006 <- brick("defor2_.jpg")
+
+l2006 
+# plotting imported image of 2006
+plotRGB(l2006, r=1, g=2, b=3, stretch="Lin")
+
+# again
+# defor1_.1 = NIR
+# defor1_.2 = red
+# defor1_.3 = green
+
+# par
+
+par(mfrow=c(2,1)) # first colum,2 and then row, so 1
+plotRGB(l1992, r=1, g=2, b=3, stretch="Lin")
+plotRGB(l2006, r=1, g=2, b=3, stretch="Lin")
+
+# let's calculate the energy in 1992
+dev.off() # to get rid off plot
+dvi1992 <- l1992$defor1_.1 - l1992$defor1_.2
+cl <- colorRampPalette(c('darkblue','yellow','red','black'))(100) # specify a color scheme
+plot(dvi1992, col=cl)
+
+# calculate energy in 2006
+dvi2006 <- l2006$defor2_.1 - l2006$defor2_.2
+cl <- colorRampPalette(c('darkblue','yellow','red','black'))(100) # specify a color scheme
+plot(dvi2006, col=cl)
+
+# differencing two images of energy in two different times
+dvidif <- dvi1992 - dvi2006
+# plot the results
+cld <- colorRampPalette(c('blue','white','red'))(100) 
+plot(dvidif, col=cld)
+
+# final plot with the original images, dvis and the final dvi difference
+par(mfrow=c(3,2)) # so 3 colums and 2 rows
+plotRGB(l1992, r=1, g=2, b=3, stretch="Lin")
+plotRGB(l2006, r=1, g=2, b=3, stretch="Lin")
+plot(dvi1992, col=cl)
+plot(dvi2006, col=cl)
+plot(dvidif, col=cld)
+
+
+pdf("energy.pdf") # create a pdf file
+par(mfrow=c(3,2))
+plotRGB(l1992, r=1, g=2, b=3, stretch="Lin")
+plotRGB(l2006, r=1, g=2, b=3, stretch="Lin")
+plot(dvi1992, col=cl)
+plot(dvi2006, col=cl)
+plot(dvidif, col=cld)
+dev.off() 
+
+# now one without RGB plots 
+pdf("dvi.pdf")
+par(mfrow=c(3,1))
+plot(dvi1992, col=cl)
+plot(dvi2006, col=cl)
+plot(dvidif, col=cld)
+dev.off() 
