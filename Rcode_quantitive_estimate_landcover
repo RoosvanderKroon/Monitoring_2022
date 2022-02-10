@@ -7,15 +7,17 @@ library(gridExtra) # package for multiframe ggplot
 # install.packages("patchwork")
 library(patchwork)
 
+# unSuperclass (Unsupervised Classification)
+
 
 # setwd("C:/lab/") # Windows
 
 
 # brick
-# 1 list the files available
+# 1 first list the files available
 rlist <- list.files(pattern="defor")
 rlist
-# 2 lapply: apply a function to a list 
+# 2 second lapply: apply a function to a list 
 list_rast <- lapply(rlist, brick) # lapply(x, FUN)
 list_rast
 
