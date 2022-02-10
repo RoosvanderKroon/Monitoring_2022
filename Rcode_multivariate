@@ -1,12 +1,20 @@
-# install.package("vegan")
+# function used today
+# load (can load R objects saved in the current or any earlier format)
+# decorana (Performs detrended correspondence analysis and basic reciprocal averaging)
+# attach (Attach Set of R Objects to Search Path)
+# ordiellipse (Function ordiellipse draws lines or polygons for ellipses by groups)
+# ordispider (draws a ‘spider’ diagram where each point is connected to the group centroid with segments)
+
+# install.package("vegan") (provides tools for descriptive community ecology. It has most basic functions of diversity analysis, community ordination and dissimilarity analysis)
 library(vegan)
+
 
 #setwd
 setwd("C:/lab/") 
 
-#load Rdata with load function
+# load Rdata with load function
 load("biomes_multivar.RData")
-ls () # list objects
+ls () #  to list of objects
 
 # decorana: Detrended Correspondence Analysis and Basic Reciprocal Averaging
 multivar<- decorana(biomes)
