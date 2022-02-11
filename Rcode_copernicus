@@ -1,0 +1,121 @@
+# code for uploading and visualizing copernicus data
+
+#function used today
+# 
+
+install.packages("ncdf4") 
+install.packages("viridis")
+library(ncdf4)
+library(raster)
+library(RStoolbox)
+library(viridis)
+library(ggplot2)
+library(patchwork)
+
+# Set the working directory
+# setwd("~/lab/copernicus/") # Linux 
+setwd("C:/lab//copernicus/")  # windows
+# setwd("/Users/name/lab/copernicus/") # mac
+
+snow20211214 <- raster("c_gls_SCE_202112140000_NHEMI_VIIRS_V1.0.1.nc") # data snowcover from 14 december 2021
+# how many layers are inside copernicus data
+# snow20211214_ <- brick("c_gls_SCE_202112140000_NHEMI_VIIRS_V1.0.1.nc")
+
+snow20211214
+
+plot(snow20211214)
+
+cl <- colorRampPalette(c("dark blue","blue","light blue"))(100)
+plot(snow20211214, col=cl)
+
+# this is bad, colors are not distinct enough. change to three very different colors
+cl <- colorRampPalette(c("blue","green","red"))(100)
+plot(snow20211214, col=cl)
+
+
+# ggplot function to plot graph
+ggplot() + 
+geom_raster(snow20211214, mapping = aes(x=x, y=y, fill=Snow.Cover.Extent))  
+
+# ggplot function with viridis
+ggplot() + 
+geom_raster(snow20211214, mapping = aes(x=x, y=y, fill=Snow.Cover.Extent)) +
+scale_fill_viridis() 
+
+ggplot() + 
+geom_raster(snow20211214, mapping = aes(x=x, y=y, fill=Snow.Cover.Extent)) +
+scale_fill_viridis(option="cividis") # cividis is a color scale
+
+ggplot() + 
+geom_raster(snow20211214, mapping = aes(x=x, y=y, fill=Snow.Cover.Extent)) +
+scale_fill_viridis(option="cividis") + 
+ggtitle("cividis palette") # add a title to graph
+
+
+
+# day 2
+
+# importing all data together with the lapply function
+rlist <- list.files(pattern="SCE") # snow cover extent
+rlist
+
+list_rast <- lapply(rlist, raster)
+list_rast
+
+snowstack <- stack(list_rast)
+snowstack
+
+ssummer <- snowstack$Snow.Cover.Extent.1
+swinter <- snowstack$Snow.Cover.Extent.2
+
+ggplot() + 
+geom_raster(ssummer, mapping = aes(x=x, y=y, fill=Snow.Cover.Extent.1)) +
+scale_fill_viridis(option="viridis") +
+ggtitle("Snow cover during my birthday")
+
+ggplot() + 
+geom_raster(swinter, mapping = aes(x=x, y=y, fill=Snow.Cover.Extent.2)) +
+scale_fill_viridis(option="viridis") +
+ggtitle("Snow cover during freezing winter")
+
+# lets patch them together
+
+p1 <- ggplot() + 
+geom_raster(ssummer, mapping = aes(x=x, y=y, fill=Snow.Cover.Extent.1)) +
+scale_fill_viridis(option="viridis") +
+ggtitle("Snow cover during my birthday")
+
+p2 <- ggplot() + 
+geom_raster(swinter, mapping = aes(x=x, y=y, fill=Snow.Cover.Extent.2)) +
+scale_fill_viridis(option="viridis") +
+ggtitle("Snow cover during freezing winter")
+
+p1 / p2
+
+
+
+# crop the image on a certain area
+
+# longitude from 0 - 20
+# latitude from 30 - 50
+
+# crop the stack to the extent of Sicily
+ext <- c(0, 20, 30, 50)
+
+stack_cropped <- crop(snowstack, ext) #  crops the whole stack, and afterwards single variables (layers) can be extracted
+
+ssummer_cropped <- crop(ssummer, ext)
+swinter_cropped <- crop(swinter, ext)
+
+p1 <- ggplot() + 
+geom_raster(ssummer_cropped, mapping = aes(x=x, y=y, fill=Snow.Cover.Extent.1)) +
+scale_fill_viridis(option="viridis") +
+ggtitle("Snow cover during my birthday")
+
+p2 <- ggplot() + 
+geom_raster(swinter_cropped, mapping = aes(x=x, y=y, fill=Snow.Cover.Extent.2)) +
+scale_fill_viridis(option="viridis") +
+ggtitle("Snow cover during freezing winter")
+
+p1 / p2
+
