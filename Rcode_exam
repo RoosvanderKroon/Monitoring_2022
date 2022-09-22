@@ -1,0 +1,162 @@
+# load libraries for used packages 
+library(ncdf4)
+library(raster)
+library(RStoolbox)
+library(viridis)
+library(ggplot2)
+library(patchwork)
+
+# setting working directory
+setwd("C:/lab/exam")
+# importing copernicus data soil water index 2022
+swi2022<- raster("c_gls_SWI_202201011200_GLOBE_ASCAT_V3.2.1.nc")
+swi2022
+ 
+# quick plot to see how it looks
+plot(swi2022)
+# looks really small even though the extent is -180, 180, -90, 90  (xmin, xmax, ymin, ymax) 
+# Does not matter much if I change the plot view panel, graph stays small
+# Maybe if I specify again the extent with ext function?
+ext<- c(-180,180,-90,90)
+plot(swi2022, ext)
+# No still map stays small
+# started googling and found that it could depend on the par settings, the plot margins settings
+par("mar")
+[1] 5.1 4.1 4.1 2.1 # these are the default settings in this order c(bottom, left, top, right)
+# https://community.rstudio.com recommended adjusting original to new par setting
+new.par = par(mar = c(3, 4, 1, 2))
+plot(swi2022)
+# yes clearer picture
+
+
+
+#importing rest of the data SWI from 2017 and 2012
+
+swi2017<- raster("c_gls_SWI_201701011200_GLOBE_ASCAT_V3.1.1.nc")
+swi2017
+
+
+plot(swi2017)
+
+swi2012<- raster("c_gls_SWI_201201011200_GLOBE_ASCAT_V3.1.1.nc")
+swi2012
+
+plot(swi2012)
+
+# All plots look good, lets make it more appealing and all at once
+
+cl <- colorRampPalette(c("light blue","blue","dark blue"))(100)
+par(mfrow=c(2,2))
+plot(swi2022, col=cl)
+plot(swi2017, col=cl)
+plot(swi2012, col=cl)
+
+# Remove all plots
+dev.off()
+
+# making list of the SWI files
+list<- list.files (pattern= "SWI")
+list
+
+# lapply to connect raster function to the list
+rasterlist<- lapply (list, raster)
+rasterlist
+# stack of the rasterlayers
+stackswi<- stack(rasterlist)
+
+# different periods of time with their corresponding SWI
+# swihistory 2012, swimid 2017, swipresent 2022
+swihistory<- stackswi$Soil.Water.Index.with.T.5.1
+swimid<-stackswi$Soil.Water.Index.with.T.5.2
+swipresent<- stackswi$Soil.Water.Index.with.T.5.3
+
+# making the ggplots per time period
+# again set the new.par otherwise the graphs will again be very small
+new.par = par(mar = c(3, 4, 1, 2))
+par(mfrow=c(2,2)
+
+ggplot() +
+          geom_raster(swihistory, mapping = aes(x=x, y=y, fill=Soil.Water.Index.with.T.5.1)) +
+         scale_fill_viridis(option="cividis") +
+          ggtitle("Soil Water Index History in 2012")
+          
+# This error occurs, and its the same when I try for the other time periods          
+Error in `fortify()`:
+! `data` must be a data frame, or other object coercible by `fortify()`, not an S4 object with class RasterLayer.
+Run `rlang::last_error()` to see where the error occurred.
+# so I ran, `rlang::last_error()`
+rlang::last_error()
+<error/rlang_error>
+Error in `fortify()`:
+! `data` must be a data frame, or other object coercible by `fortify()`, not an S4 object with class RasterLayer.
+---
+Backtrace:
+ 1. ggplot2::fortify(swihistory)
+ 2. ggplot2:::fortify.default(swihistory)
+Run `rlang::last_trace()` to see the full context.
+# same thing for rlang `rlang::last_trace()`
+Error in `fortify()`:
+! `data` must be a data frame, or other object coercible by `fortify()`, not an S4 object with class RasterLayer.
+---
+Backtrace:
+    x
+ 1. +-ggplot2::fortify(swihistory)
+ 2. \-ggplot2:::fortify.default(swihistory)
+ 3.   \-rlang::abort(msg)
+ # tried googling but could not find anything specifically about it being an S4 object with class rasterlayer, extremely frustating because I was able to 
+ # construct all the ggplots the day before, did not understand why this kept happening
+ # But then i Found this on Forum : "As far as I can tell, fortify within ggplot2 does not support raster input, but the package RStoolbox allows 
+# you to use fortify on raster data. If you haven't figured this issue out yet, try loading RStoolbox and see if it works." 
+# Found it odd because I knew for sure that I loaded the package RStoolbox, but still lets check. 
+# scrolled all the way up in R and saw this: 
+# > library(raster) library(RStoolbox)
+# Error: unexpected symbol in "library(raster) library"
+# The library for RStoolbox was accidentally placed nes to the library of raster and that is why it was not working
+# so let's run the ggplot function
+
+ggplot() +
+          geom_raster(swihistory, mapping = aes(x=x, y=y, fill=Soil.Water.Index.with.T.5.1)) +
+         scale_fill_viridis(option="cividis") +
+          ggtitle("Soil Water Index History in 2012")
+# Yes it works!
+# Continue plotting for period 2017 and 2022
+
+ggplot() +
+     geom_raster(swimid, mapping = aes(x=x, y=y, fill=Soil.Water.Index.with.T.5.2)) +
+     scale_fill_viridis(option="cividis") +
+     ggtitle("Soil Water Index History in 2017")
+          
+ggplot() +
+          geom_raster(swipresent, mapping = aes(x=x, y=y, fill=Soil.Water.Index.with.T.5.3)) +
+          scale_fill_viridis(option="cividis") +
+          ggtitle("Soil Water Index History in 2022")
+          
+# all ggplots together
+p1<- ggplot() +
+          geom_raster(swihistory, mapping = aes(x=x, y=y, fill=Soil.Water.Index.with.T.5.1)) +
+          scale_fill_viridis(option="cividis") +
+          ggtitle("Soil Water Index History in 2012")         
+p1
+# legend above the plot with a large title, place legend to right side and remove title
+p1<- ggplot() +
+          geom_raster(swihistory, mapping = aes(x=x, y=y, fill=Soil.Water.Index.with.T.5.1)) +
+          scale_fill_viridis(option="cividis") +
+          ggtitle("Soil Water Index History in 2012") + theme(legend.position= "right", legend.title = element_blank())
+# do the same for p2 and p3
+p2<- ggplot() +
+     geom_raster(swimid, mapping = aes(x=x, y=y, fill=Soil.Water.Index.with.T.5.2)) +
+     scale_fill_viridis(option="cividis") +
+     ggtitle("Soil Water Index History in 2017") +  theme(legend.position= "right", legend.title = element_blank())
+p3<- ggplot() +
+          geom_raster(swipresent, mapping = aes(x=x, y=y, fill=Soil.Water.Index.with.T.5.3)) +
+          scale_fill_viridis(option="cividis") +
+          ggtitle("Soil Water Index History in 2022") + theme(legend.position= "right", legend.title = element_blank())
+          
+# trying to patch the plots together
+p1/p2/p3
+# all very narrow in one column
+
+
+
+
+
