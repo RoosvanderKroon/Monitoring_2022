@@ -178,10 +178,20 @@ p1<- ggplot() +
 plot_grid(p1, p2, p3)
 
 ############################
-# retrieve occurence data for Sylvestris pinus in year 2022 within mediterrenean area
+# retrieve occurence data for Pinus sylvestris in year 2022 within mediterrenean area
 data2022<-occ_search(scientificName = "Pinus sylvestris", hasCoordinate = T, year = 2022, limit=10000, decimalLatitude = "-15,50", decimalLongitude = "30,50")
 
-
-
+#clean up the data
+data2022<- data2022$data
+loc2022 <- data2022 %>%
+          dplyr::select(decimalLongitude, decimalLatitude)
+# plot the points with the coordinates within the ggplot of swi2022crop
+ploc2022<- ggplot() +
+              geom_raster(swi2022crop, mapping = aes(x=x, y=y, fill=Soil.Water.Index.with.T.5.3)) +
+          scale_fill_viridis(option="cividis", direction=-1) +
+          ggtitle("Location S. pinus in relation to SWI of Mediterranean in 2022") + theme(legend.position= "right") + labs(fill = "SWI") + 
+           geom_point(data = loc2022, aes(x= decimalLongitude, y= decimalLatitude), size = 1, shape = 23, fill = "darkgreen") +  
+           theme(plot.title = element_text(size = 10))
+ # now you can see the occurence data of Pinus 
 
 
