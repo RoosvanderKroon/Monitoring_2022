@@ -193,5 +193,30 @@ ploc2022<- ggplot() +
            geom_point(data = loc2022, aes(x= decimalLongitude, y= decimalLatitude), size = 1, shape = 23, fill = "darkgreen") +  
            theme(plot.title = element_text(size = 10))
  # now you can see the occurence data of Pinus 
+ # also do this for 2012 and 2017
+ 
+ data2012<-occ_search(scientificName = "Pinus sylvestris", hasCoordinate = T, year = 2012, limit=10000, decimalLatitude = "30,50", decimalLongitude = "-15,50")
+ loc2012 <- data2012 %>%
+     dplyr::select(decimalLongitude, decimalLatitude)
+ ploc2012<- ggplot() +
+     geom_raster(swi2012crop, mapping = aes(x=x, y=y, fill=Soil.Water.Index.with.T.5.1)) +
+     scale_fill_viridis(option="cividis", direction=-1) +
+     ggtitle("Location S. pinus in relation to SWI of Mediterranean in 2012") + theme(legend.position= "right") + labs(fill = "SWI") + 
+     geom_point(data = loc2012, aes(x= decimalLongitude, y= decimalLatitude), size = 1, shape = 23, fill = "darkgreen") +  
+     theme(plot.title = element_text(size = 10)) 
+     
+     data2072<-occ_search(scientificName = "Pinus sylvestris", hasCoordinate = T, year = 2017, limit=10000, decimalLatitude = "30,50", decimalLongitude = "-15,50")
+ loc2017 <- data2017 %>%
+     dplyr::select(decimalLongitude, decimalLatitude)
+ ploc2017<- ggplot() +
+     geom_raster(swi2017crop, mapping = aes(x=x, y=y, fill=Soil.Water.Index.with.T.5.2)) +
+     scale_fill_viridis(option="cividis", direction=-1) +
+     ggtitle("Location S. pinus in relation to SWI of Mediterranean in 2017") + theme(legend.position= "right") + labs(fill = "SWI") + 
+     geom_point(data = loc2017, aes(x= decimalLongitude, y= decimalLatitude), size = 1, shape = 23, fill = "darkgreen") +  
+     theme(plot.title = element_text(size = 10)) 
+# plot all of them on one page to see how the distribution has changed every five years 
+ plot_grid(ploc2012, ploc2017, ploc2022)
+# within the 10 years the distribution became more widespread   
+
 
 
