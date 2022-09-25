@@ -5,7 +5,8 @@ library(RStoolbox)
 library(viridis)
 library(ggplot2)
 library(patchwork)
-
+library(tidyverse)
+library(cowplot)
 # setting working directory
 setwd("C:/lab/exam")
 # importing copernicus data soil water index 2022
@@ -154,7 +155,31 @@ p3<- ggplot() +
           
 # trying to patch the plots together
 p1/p2/p3
-# all very narrow in one column
+# all very narrow in one column, function parmfrow does noet work for ggplots
+# install cowplot to plot three ggplots on one page
+library (cowplot)
+
+
+# add legend title "SWI" and change the direction of the colours so that higher SWI will be blue instead of yellow
+
+p1<- ggplot() +
+     geom_raster(swi2012crop, mapping = aes(x=x, y=y, fill=Soil.Water.Index.with.T.5.1)) +
+     scale_fill_viridis(option="cividis", direction =-1) +
+     ggtitle("Soil Water Index Mediterranean in 2012") + theme(legend.position= "right") + labs(fill = "SWI")
+ p2<- ggplot() +
+     geom_raster(swi2017crop, mapping = aes(x=x, y=y, fill=Soil.Water.Index.with.T.5.2)) +
+     scale_fill_viridis(option="cividis", direction =-1) +
+     ggtitle("Soil Water Index Mediterranean in 2017") + theme(legend.position= "right") + labs(fill = "SWI")
+ p3<- ggplot() +
+     geom_raster(swi2022crop, mapping = aes(x=x, y=y, fill=Soil.Water.Index.with.T.5.3)) +
+     scale_fill_viridis(option="cividis", direction=-1) +
+     ggtitle("Soil Water Index Mediterranean in 2022") + theme(legend.position= "right") + labs(fill = "SWI")
+     
+plot_grid(p1, p2, p3)
+
+############################
+# retrieve occurence data for Sylvestris pinus in year 2022 within mediterrenean area
+data2022<-occ_search(scientificName = "Pinus sylvestris", hasCoordinate = T, year = 2022, limit=10000, decimalLatitude = "-15,50", decimalLongitude = "30,50")
 
 
 
