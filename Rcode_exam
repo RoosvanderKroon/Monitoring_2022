@@ -1,3 +1,6 @@
+# How has the ditribution of Pinus Sylvestris changed in the Mediterranean between 2012-2022 and does a correlation exist between location of the occurences and
+# soil water index?
+# First: Start with copernicus data of soil water index
 # load libraries for used packages 
 library(ncdf4)
 library(raster)
@@ -20,7 +23,7 @@ plot(swi2022)
 # Maybe if I specify again the extent with ext function?
 ext<- c(-180,180,-90,90)
 plot(swi2022, ext)
-# No still map stays small
+# No map still stays small
 # started googling and found that it could depend on the par settings, the plot margins settings
 par("mar")
 [1] 5.1 4.1 4.1 2.1 # these are the default settings in this order c(bottom, left, top, right)
@@ -44,7 +47,7 @@ swi2012
 
 plot(swi2012)
 
-# All plots look good, lets make it more appealing and all at once
+# All plots look good, lets make it more appealing with colourpalette and show them all at once
 
 cl <- colorRampPalette(c("light blue","blue","dark blue"))(100)
 par(mfrow=c(2,2))
@@ -62,10 +65,10 @@ list
 # lapply to connect raster function to the list
 rasterlist<- lapply (list, raster)
 rasterlist
-# stack of the rasterlayers
+# now make a stack of the rasterlayers
 stackswi<- stack(rasterlist)
 
-# different periods of time with their corresponding SWI
+# different periods of time, so every 5 years between 2012-2022 with their corresponding SWI
 # swihistory 2012, swimid 2017, swipresent 2022
 swihistory<- stackswi$Soil.Water.Index.with.T.5.1
 swimid<-stackswi$Soil.Water.Index.with.T.5.2
@@ -138,7 +141,7 @@ p1<- ggplot() +
           scale_fill_viridis(option="cividis") +
           ggtitle("Soil Water Index History in 2012")         
 p1
-# legend above the plot with a large title, place legend to right side and remove title
+# legend is above the plot with a large title, place legend to right side and remove title
 p1<- ggplot() +
           geom_raster(swihistory, mapping = aes(x=x, y=y, fill=Soil.Water.Index.with.T.5.1)) +
           scale_fill_viridis(option="cividis") +
@@ -216,7 +219,11 @@ ploc2022<- ggplot() +
      theme(plot.title = element_text(size = 10)) 
 # plot all of them on one page to see how the distribution has changed every five years 
  plot_grid(ploc2012, ploc2017, ploc2022)
-# within the 10 years the distribution became more widespread   
+ 
+# If you look at the period of 2012 to 2017, you can see that distribution is mostly concentrated in France and it has gotten a lower SWI in 2017. You can see that
+# number of occurences is also less in 2017, maybe in correlation with the decreased SWI in 2017.
+# Now between 2017-2022 most regions have actually a higher SWI in 2022 than in 2017, but the distribution is now mostly focussed in the Alps with also a bit more 
+# occurences south (for example in Portugal)
 
 
 
