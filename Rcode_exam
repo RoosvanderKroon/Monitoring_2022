@@ -161,6 +161,11 @@ p1/p2/p3
 # all very narrow in one column, function parmfrow does noet work for ggplots
 # install cowplot to plot three ggplots on one page
 library (cowplot)
+# but first make a crop on the Mediterranean area 
+ext <- c(-15, 50, 30, 50)
+swi2012crop<- crop(swihistory, ext)
+swi2017crop<- crop(swimid, ext)
+swi2022crop<- crop(swipresent, ext)
 
 
 # add legend title "SWI" and change the direction of the colours so that higher SWI will be blue instead of yellow
